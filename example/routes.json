@@ -1,0 +1,9 @@
+{
+  "routes":{
+    "article/{id}":{
+      "param":{
+        "id":"\\d"
+      }
+    }
+  }
+}

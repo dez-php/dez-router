@@ -1,0 +1,23 @@
+{
+    "name": "dez-php/dez-router",
+    "description": "Router Component",
+    "keywords": ["php router","router", "dez-php router"],
+    "authors": [
+        {
+            "name": "Ivan Gontarenko",
+            "email": "vania.gontarenko@gmail.com"
+        }
+    ],
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": ">=5.5",
+        "dez-php/dez-di": ">=1.0",
+        "dez-php/dez-event": ">=1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dez\\Router\\": "src/Router"
+        }
+    }
+}
