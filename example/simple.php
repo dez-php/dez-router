@@ -36,7 +36,24 @@ $di->set( 'eventDispatcher', function() {
 try {
     /** @var Router $router */
     $router = $di->get( 'router' );
-    $router->getEventDispatcher();
+    $router->add( '/home', 'index::home', [ 'GET', 'POST' ] );
+
+    $router->add( '/page-{{page_id}}/:controller/category-{{name:([a-z]{10,20})}}/some-{{id::int}}-{{pseudo:([a-z_-]{10,})}}-{{format:(json|html|plain+)}}.php', [
+        'id' => 1,
+    ], [ 'GET' ] );
+
+    $router->add( '/page-:controller/do_:action/:int/:params', [
+        'id' => 1,
+    ], [ 'GET' ] );
+
+    $router->add( '/super-welcome.html', [
+        'controller'    => 'promo',
+        'action'        => 'page1',
+        'params'        => [
+            1,2,3
+        ]
+    ], [ 'GET', ] );
+
 } catch ( \Exception $e ) {
     header('content-type: text\plain');
     die($e->getMessage() ."\n-------------\n". $e->getTraceAsString());

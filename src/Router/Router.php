@@ -5,7 +5,7 @@
     use Dez\DependencyInjection\Injectable;
     use Dez\EventDispatcher\Dispatcher;
 
-    class Router extends Injectable {
+    class Router extends Injectable implements RouterInterface {
 
         protected $eventDispatcher;
 
@@ -19,6 +19,23 @@
 
         public function __construct() {
 
+        }
+
+        public function add( $pattern = '', $paths = null, $method = null ) {
+
+            if( $method !== null && ! is_array( $method ) ) {
+                $method     = [ $method ];
+            }
+
+            $this->getEventDispatcher()->dispatch( 'beforeRouteAdd', new EventRouter( $this ) );
+
+            $route  = new Route( $pattern, $paths, $method );
+
+            $this->routes[]     = $route;
+
+            $this->getEventDispatcher()->dispatch( 'afterRouteAdd', new EventRouter( $this ) );
+
+            return $route;
         }
 
         /**
