@@ -4,13 +4,15 @@
 
     class Route implements RouteInterface {
 
-        protected $pattern  = '';
+        protected $pattern          = '';
 
         protected $compiledPattern  = '';
 
-        protected $paths    = null;
+        protected $paths            = null;
 
-        protected $methods  = [];
+        protected $methods          = [];
+
+        protected $regex_able       = false;
 
         public function __construct( $pattern = '', $paths = null, array $methods = [] ) {
 
@@ -86,16 +88,38 @@
             return $this;
         }
 
+        /**
+         * @return boolean
+         */
+        public function isRegexAble() {
+            return $this->regex_able;
+        }
+
+        /**
+         * @param boolean $regex_able
+         * @return static
+         */
+        public function setRegexAble( $regex_able ) {
+            $this->regex_able = $regex_able;
+            return $this;
+        }
+
         protected function compilePattern() {
 
             $this->setCompiledPattern( $this->getPattern() );
 
             if( strpos( $this->getCompiledPattern(), ':' ) !== false ) {
+                $this->setRegexAble( true );
                 $this->replaceMacros();
             }
 
             if( strpos( $this->getCompiledPattern(), '{{' ) !== false ) {
+                $this->setRegexAble( true );
                 $this->replacePseudoPatterns();
+            }
+
+            if( $this->isRegexAble() ) {
+                $this->setCompiledPattern( "#^{$this->getCompiledPattern()}$#ui" );
             }
 
         }
