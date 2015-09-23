@@ -13,6 +13,7 @@
     "require": {
         "php": ">=5.5",
         "dez-php/dez-di": ">=1.0",
+        "dez-php/dez-http": ">=1.0",
         "dez-php/dez-event": ">=1.0"
     },
     "autoload": {

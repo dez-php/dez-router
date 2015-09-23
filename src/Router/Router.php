@@ -17,7 +17,7 @@
 
         protected $routes           = [];
 
-        protected $handledUri       = '/';
+        protected $targetUri        = '/';
 
         protected $matchedRoute     = null;
 
@@ -47,15 +47,15 @@
             $this->setMatchedRoute( null );
 
             if( $uri !== null && is_string( $uri ) ) {
-                $this->setHandledUri( $uri );
+                $this->setTargetUri( $uri );
             }
 
             foreach( $this->getRoutes() as $route ) {
 
                 if( $route->isRegexAble() ) {
-                    $founded    = preg_match_all( $route->getCompiledPattern(), $this->getHandledUri(), $matches );
+                    $founded    = preg_match_all( $route->getCompiledPattern(), $this->getTargetUri(), $matches );
                 } else {
-                    $founded    = $this->getHandledUri() === $route->getPattern();
+                    $founded    = $this->getTargetUri() === $route->getPattern();
                 }
 
                 if( ! $founded ) {
@@ -151,16 +151,16 @@
         /**
          * @return string
          */
-        public function getHandledUri() {
-            return $this->handledUri;
+        public function getTargetUri() {
+            return $this->targetUri;
         }
 
         /**
-         * @param string $handledUri
+         * @param string $targetUri
          * @return static
          */
-        public function setHandledUri( $handledUri ) {
-            $this->handledUri = $handledUri;
+        public function setTargetUri( $targetUri ) {
+            $this->targetUri = $targetUri;
             return $this;
         }
 
@@ -180,5 +180,20 @@
             return $this;
         }
 
+        public function import( $fileExtention, $filePath ) {
+
+        }
+
+        public function importFromJson( $filePath ) {
+
+        }
+
+        public function importFromXml( $filePath ) {
+
+        }
+
+        public function merge( RouterInterface $router ) {
+
+        }
 
     }

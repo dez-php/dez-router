@@ -14,6 +14,10 @@
 
         protected $regex_able       = false;
 
+        protected $leftSeparator    = '{{';
+
+        protected $rightSeparator   = '}}';
+
         public function __construct( $pattern = '', $paths = null, array $methods = [] ) {
 
             $this->setPattern( $pattern );
@@ -104,6 +108,38 @@
             return $this;
         }
 
+        /**
+         * @return string
+         */
+        public function getLeftSeparator() {
+            return $this->leftSeparator;
+        }
+
+        /**
+         * @param string $leftSeparator
+         * @return static
+         */
+        public function setLeftSeparator( $leftSeparator ) {
+            $this->leftSeparator = $leftSeparator;
+            return $this;
+        }
+
+        /**
+         * @return string
+         */
+        public function getRightSeparator() {
+            return $this->rightSeparator;
+        }
+
+        /**
+         * @param string $rightSeparator
+         * @return static
+         */
+        public function setRightSeparator( $rightSeparator ) {
+            $this->rightSeparator = $rightSeparator;
+            return $this;
+        }
+
         protected function compilePattern() {
 
             $this->setCompiledPattern( $this->getPattern() );
@@ -115,28 +151,28 @@
 
             if( strpos( $this->getCompiledPattern(), '{{' ) !== false ) {
                 $this->setRegexAble( true );
-                $this->replacePseudoPatterns();
+                $this->replacePatterns();
             }
 
             if( $this->isRegexAble() ) {
-                $this->setCompiledPattern( "#^{$this->getCompiledPattern()}$#ui" );
+                $this->setCompiledPattern( "~^{$this->getCompiledPattern()}$~ui" );
             }
 
         }
 
         protected function replaceMacros() {
 
-            $pattern        = '([\w\d_-]+)';
-            $anyPattern     = '(/.*)';
-            $intPattern     = '(\d+)';
+            $pattern        = '/([a-zA-Z0-9-_]+)';
+            $anyPattern     = '/(/.*)';
+            $intPattern     = '/([0-9]+)';
 
             $macroses       = [
-                ':module'       => $pattern,
-                ':controller'   => $pattern,
-                ':action'       => $pattern,
-                ':params'       => $anyPattern,
-                ':any'          => $anyPattern,
-                ':int'          => $intPattern,
+                '/:module'       => $pattern,
+                '/:controller'   => $pattern,
+                '/:action'       => $pattern,
+                '/:params'       => $anyPattern,
+                '/:any'          => $anyPattern,
+                '/:int'          => $intPattern,
             ];
 
             $compiled   = str_replace( array_keys( $macroses ), array_values( $macroses ), $this->getCompiledPattern() );
@@ -145,9 +181,12 @@
 
         }
 
-        protected function replacePseudoPatterns() {
+        protected function replacePatterns() {
 
-            $pattern    = '/\{\{(?:([a-z_]*?)\:?(.*))\}\}/Uui';
+            $ls         = preg_quote( $this->getLeftSeparator() );
+            $rs         = preg_quote( $this->getRightSeparator() );
+
+            $pattern    = "/{$ls}(?:([a-z_]*?)\:?(.*)){$rs}/Uui";
 
             $compiled   = preg_replace_callback( $pattern, function( $matches ) {
                 $this->paths[ $matches[1] ]     = 1;
