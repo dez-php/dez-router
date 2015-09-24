@@ -4,6 +4,7 @@ namespace Test;
 
 use Dez\DependencyInjection\Container;
 use Dez\EventDispatcher\Dispatcher;
+use Dez\Http\Request;
 use Dez\Router\Router;
 
 error_reporting(1);
@@ -33,70 +34,61 @@ $di->set( 'eventDispatcher', function() {
     return new Dispatcher();
 } );
 
+// require for router
+$di->set( 'request', function() {
+    return new Request();
+} );
+
 try {
-    /** @var Router $router */
+    /** @var $router Router */
     $router = $di->get( 'router' );
 
-    $router->add( '/:module', [
-        'module' => 1,
+    $router->add( '/products', [
+        'controller'    => 'products',
+        'action'        => 'item_detail',
+    ] );
+    $router->add( '/', [
         'controller' => 'index',
-        'action' => 'index',
-    ], [ 'GET' ] );
+        'action'    => 'dashboard'
+    ] );
+    $router->add( '/:controller' );
+    $router->add( '/:controller/:action' );
 
-    $router->add( '/{{name:([^/]+)}}/item/:int/best-offer-:int.{{format:(json|html|plain+)}}', [
-        'module' => 1,
-        'controller' => 'index',
-        'action' => 'index',
-    ], [ 'GET' ] );
+    $router->add( '/:controller/:action/:int/:any' );
+    $route = $router->add( '/:controller/:action/:int/{catalog}-{name}-{id}.{format}' );
+die(var_dump( $route ));
+    $router->add( '/:controller/:action/:int' )->via( [ 'post', 'get' ] );
+    $router->add( '/:controller/:action/:params' );
 
-    $router->add( '/:module/:controller', [
-        'module' => 1,
-        'controller' => 2,
-        'action' => 'index',
-    ], [ 'GET' ] );
+    $router->add( '/{lang}/{auth_id}/:module/:controller/:action.html', [
+        'controller'    => 'products',
+        'action'        => 'latest'
+    ] )
+        ->regex( 'lang', '[A-Z]{2}' )
+        ->regex( 'auth_id', '\d+' )
+        ->via( [ 'get', 'delete', 'post' ] );
 
-    $router->add( '/:module/:controller/:action', [
-        'module' => 1,
-        'controller' => 2,
-        'action' => 3,
-    ], [ 'GET' ] );
+    $router->handle();
 
-    $router->add( '/:module/:controller/:action/:params', [
-        'module' => 1,
-        'controller' => 2,
-        'action' => 3,
-        'params' => 4,
-    ], [ 'GET' ] );
+//    die(var_dump( $router ));
+//
+//    if( $router->isFounded() ) {
+//        $route  = $router->getMatchedRoute();
+//        die(var_dump( $router ));
+//    } else {
+//        die('not found');
+//    }
 
-    $router->add( '/index/index', 'index::home', [ 'GET', 'POST' ] );
-
-    $router->add( '/page-{{page_id}}/:controller/category-{{name:([a-z]{10,20})}}/some-{{id::int}}-{{pseudo:([a-z_-]{10,})}}-{{format:(json|html|plain+)}}.php', [
-        'id' => 1,
-    ], [ 'GET' ] );
-
-    $router->add( '/page-:controller/do_:action/:int/:params', [
-        'id' => 1,
-    ], [ 'GET' ] );
-
-    $router->add( '/super-welcome.html', [
-        'controller'    => 'promo',
-        'action'        => 'page1',
-        'params'        => [
-            1,2,3
-        ]
-    ], [ 'GET', ] );
-
-    foreach( $testRoutes as $route ) {
-
-        $router->handle( $route );
-
-        var_dump( $route, $router->getMatchedRoute() );
-
+    foreach( $testRoutes as $testRoute ) {
+        $router->handle( $testRoute );
+        if( $router->isFounded() ) {
+            var_dump( $testRoute, $router->getMatchedRoute()->getMatches() );
+        } else {
+            var_dump( $testRoute, 'not found' );
+        }
     }
 
 } catch ( \Exception $e ) {
     header('content-type: text\plain');
     die($e->getMessage() ."\n-------------\n". $e->getTraceAsString());
 }
-
-die(var_dump( $router ));

@@ -2,30 +2,78 @@
 
     namespace Dez\Router;
 
-    class Route implements RouteInterface {
+    use Dez\DependencyInjection\ContainerInterface;
+    use Dez\DependencyInjection\Injectable;
+    use Dez\EventDispatcher\Dispatcher;
+    use Dez\Http\RequestInterface;
 
-        protected $pattern          = '';
+    /**
+     * @property Router router
+     * @property RequestInterface request
+     * @property Dispatcher eventDispatcher
+     */
+    class Route extends Injectable implements RouteInterface {
 
+        /**
+         * @var string
+         */
+        protected $pseudoPattern    = '';
+
+        /**
+         * @var string
+         */
         protected $compiledPattern  = '';
 
-        protected $paths            = null;
+        /**
+         * @var array
+         */
+        protected $matches          = [];
 
-        protected $methods          = [];
+        /**
+         * @var array
+         */
+        protected $regexes          = [];
 
-        protected $regex_able       = false;
+        /**
+         * @var array
+         */
+        protected $methods          = [ 'GET' ];
 
-        protected $leftSeparator    = '{{';
+        /**
+         * @var bool
+         */
+        protected $regexAble        = false;
 
-        protected $rightSeparator   = '}}';
+        /**
+         * @var null
+         */
+        protected $routeId          = null;
 
-        public function __construct( $pattern = '', $paths = null, array $methods = [] ) {
+        /**
+         * @param string $pattern
+         * @param array $matches
+         * @param null $methods
+         */
+        public function __construct( $pattern = '', $matches = [], $methods = null ) {
+            $this->setPseudoPattern( $pattern )->setMatches( $matches );
 
-            $this->setPattern( $pattern );
-            $this->setPaths( $paths );
-            $this->setMethods( $methods );
+            if( count( $methods ) > 0 ) {
+                $this->setMethods( $methods );
+            }
 
-            $this->compilePattern();
+            $this->setRouteId( spl_object_hash( $this ) );
+            $this->replaceMacros();
+        }
 
+        /**
+         * @return Dispatcher $event
+         * @throws Exception
+         */
+        public function getEventDispatcher() {
+            if( ! $this->getDi()->has( 'eventDispatcher' ) ) {
+                throw new Exception( 'EventDispatcher must be registered in DependencyInjection for Router' );
+            }
+            return $this->eventDispatcher;
         }
 
         /**
@@ -45,34 +93,18 @@
         }
 
         /**
-         * @return null
-         */
-        public function getPaths() {
-            return $this->paths;
-        }
-
-        /**
-         * @param mixed $paths
-         * @return static
-         */
-        public function setPaths( $paths ) {
-            $this->paths = $paths;
-            return $this;
-        }
-
-        /**
          * @return string
          */
-        public function getPattern() {
-            return $this->pattern;
+        public function getPseudoPattern() {
+            return $this->pseudoPattern;
         }
 
         /**
-         * @param string $pattern
+         * @param string $pseudoPattern
          * @return static
          */
-        public function setPattern( $pattern = null ) {
-            $this->pattern = $pattern;
+        public function setPseudoPattern($pseudoPattern) {
+            $this->pseudoPattern = $pseudoPattern;
             return $this;
         }
 
@@ -87,8 +119,71 @@
          * @param string $compiledPattern
          * @return static
          */
-        public function setCompiledPattern( $compiledPattern ) {
+        public function setCompiledPattern($compiledPattern) {
             $this->compiledPattern = $compiledPattern;
+            return $this;
+        }
+
+        /**
+         * @return array
+         */
+        public function getMatches() {
+            return $this->matches;
+        }
+
+        /**
+         * @param array $matches
+         * @return static
+         */
+        public function setMatches( $matches ) {
+            if( count( $matches ) > 0 ) {
+                foreach( $matches as $name => $match ) {
+                    $this->setMatch( $name, $match );
+                }
+            }
+
+            return $this;
+        }
+
+        /**
+         * @param $name
+         * @param $match
+         * @return $this
+         */
+        public function setMatch( $name, $match ) {
+            $this->matches[ $name ]     = $match;
+            return $this;
+        }
+
+        /**
+         * @param $name
+         * @return bool
+         */
+        public function hasMatch( $name ) {
+            return isset( $this->matches[ $name ] );
+        }
+
+        /**
+         * @param $name
+         * @return array
+         */
+        public function getMatch( $name ) {
+            return $this->hasMatch( $name ) ? $this->matches[ $name ] : [];
+        }
+
+        /**
+         * @return null
+         */
+        public function getRouteId() {
+            return $this->routeId;
+        }
+
+        /**
+         * @param null $routeId
+         * @return static
+         */
+        public function setRouteId( $routeId ) {
+            $this->routeId = sha1( $routeId );
             return $this;
         }
 
@@ -96,107 +191,143 @@
          * @return boolean
          */
         public function isRegexAble() {
-            return $this->regex_able;
+            return $this->regexAble;
         }
 
         /**
-         * @param boolean $regex_able
+         * @param boolean $regexAble
          * @return static
          */
-        public function setRegexAble( $regex_able ) {
-            $this->regex_able = $regex_able;
+        public function setRegexAble( $regexAble ) {
+            $this->regexAble = $regexAble;
             return $this;
         }
 
         /**
-         * @return string
+         * @param $name
+         * @param $regex
+         * @return $this
          */
-        public function getLeftSeparator() {
-            return $this->leftSeparator;
-        }
-
-        /**
-         * @param string $leftSeparator
-         * @return static
-         */
-        public function setLeftSeparator( $leftSeparator ) {
-            $this->leftSeparator = $leftSeparator;
+        public function regex( $name, $regex ) {
+            $this->regexes[ $name ]    = [
+                'regex'         => '('. trim( $regex, '()' ) .')',
+                'replacement'   => '{'. $name .'}'
+            ];
             return $this;
         }
 
         /**
-         * @return string
+         * @param array $methods
+         * @return $this
          */
-        public function getRightSeparator() {
-            return $this->rightSeparator;
-        }
-
-        /**
-         * @param string $rightSeparator
-         * @return static
-         */
-        public function setRightSeparator( $rightSeparator ) {
-            $this->rightSeparator = $rightSeparator;
+        public function via( $methods = [] ) {
+            if( count( $methods ) > 0 ) {
+                $methods    = array_map( 'strtoupper', $methods );
+                $this->setMethods( $methods );
+            }
             return $this;
         }
 
+        /**
+         * @return bool
+         * @throws Exception
+         */
+        public function handleUri() {
+
+            if( ! $this->getDi()->has( 'request' ) || ! ( $this->getDi()->get( 'request' ) instanceof RequestInterface ) ) {
+                throw new Exception( 'Request must be registered in DependencyInjection for Route' );
+            }
+
+            $request    = $this->request;
+            if( $request->isMethod( $this->getMethods() ) ) {
+                return $this->compilePattern();
+            }
+            return false;
+        }
+
+        /**
+         * @return bool
+         * @throws Exception
+         */
         protected function compilePattern() {
 
-            $this->setCompiledPattern( $this->getPattern() );
+            $compiled   = $this->getPseudoPattern();
 
-            if( strpos( $this->getCompiledPattern(), ':' ) !== false ) {
+            if( ! $this->getDi() || ! ( $this->getDi() instanceof ContainerInterface ) ) {
+                throw new Exception( 'DependencyInjection is require for Route' );
+            }
+
+            if( ! $this->getDi()->has( 'router' ) || ! ( $this->getDi()->get( 'router' ) instanceof RouterInterface ) ) {
+                throw new Exception( 'Router must be registered in DependencyInjection for Route' );
+            }
+
+            $router     = $this->router;
+            $targetURI  = $router->getTargetUri();
+
+            if( count( $this->regexes ) > 0 ) {
                 $this->setRegexAble( true );
-                $this->replaceMacros();
+
+                foreach( $this->regexes as $matchName => $regexes ) {
+                    $compiled   = str_replace( $regexes['replacement'], $regexes['regex'], $compiled );
+                }
+                $this->setCompiledPattern( $compiled );
+
+                preg_match_all( "~^$compiled$~Uus", $targetURI, $matches, PREG_SET_ORDER );
+
+                if( count( $matches ) > 0 && count( $matches ) !== count( $matches, true ) ) {
+                    $matches        = $matches[0];
+                    array_shift( $matches );
+
+                    preg_match_all( '/\{(\w+)\}/Uuis', $this->getPseudoPattern(), $macrosMatches, PREG_PATTERN_ORDER );
+                    $macrosMatches  = $macrosMatches[1];
+
+                    foreach( $matches as $index => $foundValue ) {
+                        $this->setMatch( $macrosMatches[$index], $foundValue );
+                    }
+
+                    $router->setMatchedRoute( $this );
+                    return true;
+                }
+            } else {
+                if( $targetURI === $this->getPseudoPattern() ) {
+                    $router->setMatchedRoute( $this );
+                    return true;
+                }
             }
 
-            if( strpos( $this->getCompiledPattern(), '{{' ) !== false ) {
-                $this->setRegexAble( true );
-                $this->replacePatterns();
-            }
-
-            if( $this->isRegexAble() ) {
-                $this->setCompiledPattern( "~^{$this->getCompiledPattern()}$~ui" );
-            }
-
+            return false;
         }
 
+        /**
+         * @return $this
+         */
         protected function replaceMacros() {
 
-            $pattern        = '/([a-zA-Z0-9-_]+)';
-            $anyPattern     = '/(/.*)';
-            $intPattern     = '/([0-9]+)';
+            $pattern        = '([a-zA-Z0-9-_]+)';
+            $anyPattern     = '(.*)';
+            $intPattern     = '(\d+)';
 
             $macroses       = [
-                '/:module'       => $pattern,
-                '/:controller'   => $pattern,
-                '/:action'       => $pattern,
-                '/:params'       => $anyPattern,
-                '/:any'          => $anyPattern,
-                '/:int'          => $intPattern,
+                ':module'       => [ 'module', $pattern ],
+                ':controller'   => [ 'controller', $pattern ],
+                ':action'       => [ 'action', $pattern ],
+                ':params'       => [ 'params', $anyPattern ],
+                ':any'          => [ 'any', $anyPattern ],
+                ':int'          => [ 'id', $intPattern ],
             ];
 
-            $compiled   = str_replace( array_keys( $macroses ), array_values( $macroses ), $this->getCompiledPattern() );
+            $compiled       = $this->getPseudoPattern();
 
-            $this->setCompiledPattern( $compiled );
+            foreach( $macroses as $macros => $replacement ) {
+                if( strpos( $compiled, $macros ) ) {
+                    $compiled   = str_replace( $macros, "{{$replacement[0]}}", $compiled );
+                    $this->regex( $replacement[0], $replacement[1] );
+                }
+            }
 
+            $this->setPseudoPattern( $compiled );
+
+            return $this;
         }
-
-        protected function replacePatterns() {
-
-            $ls         = preg_quote( $this->getLeftSeparator() );
-            $rs         = preg_quote( $this->getRightSeparator() );
-
-            $pattern    = "/{$ls}(?:([a-z_]*?)\:?(.*)){$rs}/Uui";
-
-            $compiled   = preg_replace_callback( $pattern, function( $matches ) {
-                $this->paths[ $matches[1] ]     = 1;
-                return trim( $matches[2], ':' );
-            }, $this->getCompiledPattern() );
-
-            $this->setCompiledPattern( $compiled );
-
-        }
-
-
 
     }
