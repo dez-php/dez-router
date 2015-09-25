@@ -233,7 +233,6 @@
          * @throws Exception
          */
         public function handleUri() {
-
             if( ! $this->getDi()->has( 'request' ) || ! ( $this->getDi()->get( 'request' ) instanceof RequestInterface ) ) {
                 throw new Exception( 'Request must be registered in DependencyInjection for Route' );
             }
@@ -264,12 +263,22 @@
             $router     = $this->router;
             $targetURI  = $router->getTargetUri();
 
-            if( count( $this->regexes ) > 0 ) {
+            if( strpos( $this->getPseudoPattern(), '{' ) !== false ) {
                 $this->setRegexAble( true );
 
-                foreach( $this->regexes as $matchName => $regexes ) {
-                    $compiled   = str_replace( $regexes['replacement'], $regexes['regex'], $compiled );
+                preg_match_all( '/\{(\w+)\}/Uuis', $this->getPseudoPattern(), $macrosMatches, PREG_PATTERN_ORDER );
+                list( $macroses, $macrosNames )  = $macrosMatches;
+
+                foreach( $macroses as $index => $macros ) {
+                    if( isset( $this->regexes[ $macrosNames[ $index ] ] ) ) {
+                        $regex  = $this->regexes[ $macrosNames[ $index ] ]['regex'];
+                    } else {
+                        $regex  = '([a-zA-Z0-9-_]+)';
+                        $this->regex( $macrosNames[ $index ], $regex );
+                    }
+                    $compiled   = str_replace( $macros, $regex, $compiled );
                 }
+
                 $this->setCompiledPattern( $compiled );
 
                 preg_match_all( "~^$compiled$~Uus", $targetURI, $matches, PREG_SET_ORDER );
@@ -278,11 +287,8 @@
                     $matches        = $matches[0];
                     array_shift( $matches );
 
-                    preg_match_all( '/\{(\w+)\}/Uuis', $this->getPseudoPattern(), $macrosMatches, PREG_PATTERN_ORDER );
-                    $macrosMatches  = $macrosMatches[1];
-
                     foreach( $matches as $index => $foundValue ) {
-                        $this->setMatch( $macrosMatches[$index], $foundValue );
+                        $this->setMatch( $macrosNames[$index], $foundValue );
                     }
 
                     $router->setMatchedRoute( $this );
