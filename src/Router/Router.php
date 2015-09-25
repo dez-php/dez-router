@@ -89,13 +89,13 @@
          * @throws \Dez\EventDispatcher\Exception
          */
         public function add( $pattern = '', $matches = null, $methods = null ) {
-            $this->getEventDispatcher()->dispatch( 'beforeRouteAdd', new EventRouter( $this ) );
+            $this->getEventDispatcher()->dispatch( EventRouter::BEFORE_ROUTE_ADD, new EventRouter( $this ) );
 
             $route  = new Route( $pattern, $matches, $methods );
             $route->setDi( $this->getDi() );
             $this->routes[]     = $route;
 
-            $this->getEventDispatcher()->dispatch( 'afterRouteAdd', new EventRouter( $this ) );
+            $this->getEventDispatcher()->dispatch( EventRouter::AFTER_ROUTE_ADD, new EventRouter( $this ) );
 
             return $route;
         }
@@ -109,6 +109,8 @@
 
             $this->setMatchedRoute( null );
             $this->setFounded( false );
+
+            $this->getEventDispatcher()->dispatch( EventRouter::BEFORE_HANDLE, new EventRouter( $this ) );
 
             if( $uri === null ) {
                 if( $this->getUriSource() == self::URI_SOURCE_GET_VAR ) {
@@ -142,9 +144,14 @@
                     $this->setMatches( $route->getMatches() );
 
                     $this->setFounded( true );
+
+                    $this->getEventDispatcher()->dispatch( EventRouter::ROUTE_FOUNDED, new EventRouter( $this ) );
+
                     break;
                 }
             }
+
+            $this->getEventDispatcher()->dispatch( EventRouter::AFTER_HANDLE, new EventRouter( $this ) );
 
             return $this;
         }
@@ -242,7 +249,7 @@
          * @throws Exception
          */
         public function setDirtyMatches( $dirtyMatches ) {
-            if( strpos( $dirtyMatches, '/' ) ) {
+            if( is_string( $dirtyMatches ) ) {
                 $this->dirtyMatches     = explode( '/', trim( $dirtyMatches, '/' ) );
             } else if( is_array( $dirtyMatches ) ) {
                 $this->dirtyMatches     = $dirtyMatches;

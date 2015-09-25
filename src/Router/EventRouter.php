@@ -10,6 +10,16 @@
      */
     class EventRouter extends Event {
 
+        const BEFORE_ROUTE_ADD  = 'beforeRouteAdd';
+
+        const AFTER_ROUTE_ADD   = 'afterRouteAdd';
+
+        const BEFORE_HANDLE     = 'beforeHandleRoute';
+
+        const AFTER_HANDLE      = 'afterHandleRoute';
+
+        const ROUTE_FOUNDED     = 'routeFounded';
+
         /**
          * @var
          */

@@ -260,6 +260,8 @@
                 throw new Exception( 'Router must be registered in DependencyInjection for Route' );
             }
 
+            $this->getEventDispatcher()->dispatch( EventRoute::BEFORE_COMPILE, new EventRoute( $this ) );
+
             $router     = $this->router;
             $targetURI  = $router->getTargetUri();
 
@@ -282,6 +284,8 @@
                 $this->setCompiledPattern( $compiled );
 
                 preg_match_all( "~^$compiled$~Uus", $targetURI, $matches, PREG_SET_ORDER );
+
+                $this->getEventDispatcher()->dispatch( EventRoute::AFTER_COMPILE, new EventRoute( $this ) );
 
                 if( count( $matches ) > 0 && count( $matches ) !== count( $matches, true ) ) {
                     $matches        = $matches[0];
@@ -318,8 +322,7 @@
                 ':controller'   => [ 'controller', $pattern ],
                 ':action'       => [ 'action', $pattern ],
                 ':params'       => [ 'params', $anyPattern ],
-                ':any'          => [ 'any', $anyPattern ],
-                ':int'          => [ 'id', $intPattern ],
+                ':id'           => [ 'id', $intPattern ],
             ];
 
             $compiled       = $this->getPseudoPattern();
