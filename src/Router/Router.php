@@ -33,6 +33,16 @@
         protected $action           = '';
 
         /**
+         * @var array
+         */
+        protected $matches          = [];
+
+        /**
+         * @var array
+         */
+        protected $dirtyMatches     = [];
+
+        /**
          * @var bool
          */
         protected $founded          = false;
@@ -125,6 +135,12 @@
                         $this->setAction( $route->getMatch( 'action' ) );
                     }
 
+                    if( $route->hasMatch( 'params' ) ) {
+                        $this->setDirtyMatches( $route->getMatch( 'params' ) );
+                    }
+
+                    $this->setMatches( $route->getMatches() );
+
                     $this->setFounded( true );
                     break;
                 }
@@ -190,6 +206,57 @@
         public function setAction($action) {
             $this->action = $action;
             return $this;
+        }
+
+        /**
+         * @return array
+         */
+        public function getMatches() {
+            return $this->matches;
+        }
+
+        /**
+         * @param array $matches
+         * @return static
+         */
+        public function setMatches( $matches ) {
+            if( count( $matches ) > 0 ) {
+                unset( $matches['module'], $matches['controller'], $matches['action'], $matches['params'] );
+                if( count( $matches ) > 0 ) {
+                    $this->matches  = $matches;
+                }
+            }
+            return $this;
+        }
+
+        /**
+         * @return array
+         */
+        public function getDirtyMatches() {
+            return $this->dirtyMatches;
+        }
+
+        /**
+         * @param array $dirtyMatches
+         * @return static
+         * @throws Exception
+         */
+        public function setDirtyMatches( $dirtyMatches ) {
+            if( strpos( $dirtyMatches, '/' ) ) {
+                $this->dirtyMatches     = explode( '/', trim( $dirtyMatches, '/' ) );
+            } else if( is_array( $dirtyMatches ) ) {
+                $this->dirtyMatches     = $dirtyMatches;
+            } else {
+                throw new Exception( 'Bad set dirty matches' );
+            }
+            return $this;
+        }
+
+        /**
+         * @return array
+         */
+        public function getRawMatches() {
+            return $this->getMatchedRoute()->getMatches();
         }
 
         /**

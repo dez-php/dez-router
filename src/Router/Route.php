@@ -211,7 +211,7 @@
         public function regex( $name, $regex ) {
             $this->regexes[ $name ]    = [
                 'regex'         => '('. trim( $regex, '()' ) .')',
-                'replacement'   => '{'. $name .'}'
+                'replacement'   => ":$name"
             ];
             return $this;
         }
@@ -263,10 +263,10 @@
             $router     = $this->router;
             $targetURI  = $router->getTargetUri();
 
-            if( strpos( $this->getPseudoPattern(), '{' ) !== false ) {
+            if( strpos( $this->getPseudoPattern(), ':' ) !== false ) {
                 $this->setRegexAble( true );
 
-                preg_match_all( '/\{(\w+)\}/Uuis', $this->getPseudoPattern(), $macrosMatches, PREG_PATTERN_ORDER );
+                preg_match_all( '~:([a-z_]+?)~Uuis', $this->getPseudoPattern(), $macrosMatches, PREG_PATTERN_ORDER );
                 list( $macroses, $macrosNames )  = $macrosMatches;
 
                 foreach( $macroses as $index => $macros ) {
@@ -324,10 +324,9 @@
 
             $compiled       = $this->getPseudoPattern();
 
-            foreach( $macroses as $macros => $replacement ) {
+            foreach( $macroses as $macros => list( $name, $regex ) ) {
                 if( strpos( $compiled, $macros ) ) {
-                    $compiled   = str_replace( $macros, "{{$replacement[0]}}", $compiled );
-                    $this->regex( $replacement[0], $replacement[1] );
+                    $this->regex( $name, $regex );
                 }
             }
 

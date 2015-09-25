@@ -43,42 +43,19 @@ try {
     /** @var $router Router */
     $router = $di->get( 'router' );
 
-//    $router->add( '/products', [
-//        'controller'    => 'products',
-//        'action'        => 'item_detail',
-//    ] );
-//    $router->add( '/', [
-//        'controller' => 'index',
-//        'action'    => 'dashboard'
-//    ] );
-//    $router->add( '/:controller' );
-//    $router->add( '/:controller/:action' );
+    $router->add( '/:controller/:action.:format/:module-:do/:params/:statusCode' )->regex( 'format', 'html|json' );
+    $router->handle( '/auth/api.json/backend-token/test/123qwe/hash/crypt-data/500' );
 
-//    $router->add( '/:controller/:action/:int/{catalog}-{name}-{id}.{format}' )->regex( 'format', 'html|json' );
+    die(var_dump(
+        $router->getModule(),
+        $router->getController(),
+        $router->getAction(),
+        $router->getMatches(),
+        $router->getDirtyMatches(),
+        $router->getRawMatches()
+    ));
 
-//    $router->add( '/:controller/:action/:int' )->via( [ 'post', 'get' ] );
-    $router->add( '/:controller/:action.<format>/{sub_action}/:params/:int' )->regex( 'format', 'html|json' );
-//
-//    $router->add( '/{lang}/{auth_id}/:module/:controller/:action.html', [
-//        'controller'    => 'products',
-//        'action'        => 'latest'
-//    ] )
-//        ->regex( 'lang', '[A-Z]{2}' )
-//        ->regex( 'auth_id', '\d+' )
-//        ->via( [ 'get', 'delete', 'post' ] );
 
-    $router->handle( '/auth/api.json/token/test/123qwe/hash/crypt-data/500' );
-
-    foreach( $testRoutes as $testRoute ) {
-        $router->handle( $testRoute );
-        if( $router->isFounded() ) {
-            var_dump( $testRoute, $router->getMatchedRoute()->getMatches() );
-        } else {
-            var_dump( $testRoute, 'not found' );
-        }
-    }
-
-    die(var_dump( $router ));
 
 } catch ( \Exception $e ) {
     header('content-type: text\plain');
