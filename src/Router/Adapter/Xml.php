@@ -73,16 +73,16 @@
                         }
                     }
 
-                    $currentRegex       = isset( $route[ 'regex' ] )
+                    $currentRegex           = isset( $route[ 'regex' ] )
                         ? $route[ 'regex' ]
                         : [];
 
-                    $route[ 'regex' ]   = $currentRegex + $previousRegex;
+                    $route[ 'regex' ]       = $currentRegex + $previousRegex;
+                    $routes[ $regex ]       = $route;
 
                     if( $routeXml->count() > 0 ) {
-                        $routes = array_merge( $this->buildArray( $routeXml, $regex, $route[ 'regex' ] ), $routes );
+                        $routes = array_merge( $routes, $this->buildArray( $routeXml, $regex, $route[ 'regex' ] ) );
                     }
-                    $routes[ $regex ]     = $route;
                 }
 
             }
