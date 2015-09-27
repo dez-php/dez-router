@@ -26,11 +26,12 @@ class FileArray extends RouterAdapter {
         $this->setRoutesFile( $routesFile );
         $this->parse();
 
-        parent::__construct($this->getArrayRoutes());
+        parent::__construct( $this->getArrayRoutes(), $router );
     }
 
     protected function parse() {
-        $this->setArrayRoutes( require $this->getRoutesFile() );
+        $routes  = include $this->getRoutesFile();
+        $this->setArrayRoutes( $routes );
         return $this;
     }
 

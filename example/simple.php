@@ -79,7 +79,17 @@ try {
     /** @var $router Router */
     $router = $di->get( 'router' );
 
-    $router->importFromJson( './routes.json' )->importFromXml( './routes.xml' );
+    $router
+        ->importFromArray( [
+            '/test.php'  => [
+                'matches'   => [
+                    'controller'    => 'test'
+                ]
+            ]
+        ] )
+        ->importFromFileArray( './routes.php' )
+        ->importFromJson( './routes.json' )
+        ->importFromXml( './routes.xml' );
 
 //
 //
