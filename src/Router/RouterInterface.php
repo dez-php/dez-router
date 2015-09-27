@@ -4,6 +4,12 @@
 
     interface RouterInterface {
 
-        public function merge( RouterInterface $router );
+        public function importFromJson( $routesFile = null );
+
+        public function importFromXml( $routesFile = null );
+
+        public function importFromArray( $routesFile = null );
+
+        public function importFromFileArray( $routesFile = null );
 
     }

@@ -6,6 +6,10 @@
     use Dez\EventDispatcher\Dispatcher;
     use Dez\EventDispatcher\EventInterface;
     use Dez\Http\Request;
+    use Dez\Router\Adapter\Xml as RouterXml;
+    use Dez\Router\Adapter\Json as RouterJson;
+    use Dez\Router\Adapter\NativeArray as RouterArray;
+    use Dez\Router\Adapter\FileArray as RouterFileArray;
 
     /**
      * @property EventInterface eventDispatcher
@@ -368,10 +372,40 @@
         }
 
         /**
-         * @param RouterInterface $router
+         * @param null $routesFile
+         * @return $this
          */
-        public function merge( RouterInterface $router ) {
-
+        public function importFromJson( $routesFile = null ) {
+            new RouterJson( $routesFile, $this );
+            return $this;
         }
+
+        /**
+         * @param null $routesFile
+         * @return $this
+         */
+        public function importFromXml( $routesFile = null ) {
+            new RouterXml( $routesFile, $this );
+            return $this;
+        }
+
+        /**
+         * @param null $routesFile
+         * @return $this
+         */
+        public function importFromArray( $routesFile = null ) {
+            new RouterArray( $routesFile, $this );
+            return $this;
+        }
+
+        /**
+         * @param null $routesFile
+         * @return $this
+         */
+        public function importFromFileArray( $routesFile = null ) {
+            new RouterFileArray( $routesFile, $this );
+            return $this;
+        }
+
 
     }

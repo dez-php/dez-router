@@ -4,6 +4,15 @@
 
     </route>
 
+    <route match=":module">
+        <route match=":controller">
+            <route match=":action">
+                <route match=":hash" hash="[a-z0-9]{32}"></route>
+                <route match=":params"></route>
+            </route>
+        </route>
+    </route>
+
     <route match=":controller">
 
         <route match=":action">

@@ -3,6 +3,7 @@
     namespace Dez\Router\Adapter;
 
     use Dez\Router\Exception;
+    use Dez\Router\Router;
     use Dez\Router\RouterAdapter;
 
     /**
@@ -13,10 +14,11 @@
 
         /**
          * Xml constructor.
-         * @param string $routesFile
+         * @param array $routesFile
+         * @param Router $router
          * @throws Exception
          */
-        public function __construct($routesFile ) {
+        public function __construct($routesFile, Router $router ) {
             if( ! file_exists( $routesFile ) ) {
                 throw new Exception( 'Routes file not found ['. $routesFile .']' );
             }
@@ -24,7 +26,7 @@
             $this->setRoutesFile( $routesFile );
             $this->parse();
 
-            parent::__construct( $this->getArrayRoutes() );
+            parent::__construct( $this->getArrayRoutes(), $router );
         }
 
         /**

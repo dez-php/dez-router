@@ -75,14 +75,11 @@ $di->set( 'request', function() {
     return new Request();
 } );
 
-$import = new Xml( './routes.xml' );
-
-$import->setDi( $di );
-$import->loadRoutes();
-
 try {
     /** @var $router Router */
     $router = $di->get( 'router' );
+
+    $router->importFromXml( './routes.xml' );
 
 //
 //
@@ -100,6 +97,17 @@ try {
 //    $router->add( '/:id-:pseudoName.:format' )->regex( 'id', '\d+' )->regex('format', 'html|json');
 
     $router->handle();
+
+    foreach( $router->getRoutes() as $route ) {
+
+        var_dump( $route->getPseudoPattern(), $route->getCompiledPattern(), '------------' );
+
+    } die;
+
+    if( $router->isFounded() ) {
+        die(var_dump( $router->getMatchedRoute() ));
+    }
+    die;
 
     foreach( $testRoutes as $testRoute ) {
         $router->handle( $testRoute );

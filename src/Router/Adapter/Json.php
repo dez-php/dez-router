@@ -14,9 +14,10 @@ class Json extends RouterAdapter {
     /**
      * Json constructor.
      * @param string $routesFile
+     * @param Router $router
      * @throws Exception
      */
-    public function __construct( $routesFile ) {
+    public function __construct( $routesFile, Router $router  ) {
         if ( ! file_exists( $routesFile ) ) {
             throw new Exception('Routes file not found [' . $routesFile . ']');
         }
@@ -24,7 +25,7 @@ class Json extends RouterAdapter {
         $this->setRoutesFile( $routesFile );
         $this->parse();
 
-        parent::__construct($this->getArrayRoutes());
+        parent::__construct( $this->getArrayRoutes(), $router );
     }
 
     protected function parse() {

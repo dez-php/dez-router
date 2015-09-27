@@ -2,13 +2,11 @@
 
     namespace Dez\Router;
 
-    use Dez\DependencyInjection\ContainerInterface;
-    use Dez\DependencyInjection\Injectable;
-
     /**
-     * @property Router router
+     * Class RouterAdapter
+     * @package Dez\Router
      */
-    abstract class RouterAdapter extends Injectable {
+    abstract class RouterAdapter {
 
         /**
          * @var array
@@ -21,11 +19,19 @@
         protected $routesFile   = '';
 
         /**
+         * @var null
+         */
+        protected $router       = null;
+
+        /**
          * RouterAdapter constructor.
          * @param array $arrayRoutes
+         * @param RouterInterface $router
          */
-        public function __construct(array $arrayRoutes = [] ) {
+        public function __construct(array $arrayRoutes = [], RouterInterface $router ) {
             $this->setArrayRoutes( $arrayRoutes );
+            $this->setRouter( $router );
+            $this->loadRoutes();
         }
 
         /**
@@ -57,22 +63,27 @@
         }
 
         /**
+         * @return null
+         */
+        public function getRouter() {
+            return $this->router;
+        }
+
+        /**
+         * @param null $router
+         */
+        public function setRouter( $router ) {
+            $this->router = $router;
+        }
+
+        /**
          * @return Router
          * @throws Exception
          */
-        public function loadRoutes() {
+        protected function loadRoutes() {
 
-            if( ! $this->getDi() || ! ( $this->getDi() instanceof ContainerInterface ) ) {
-                throw new Exception( 'DependencyInjection is require for '. static::class );
-            }
-
-            if( ! $this->getDi()->has( 'router' ) || ! ( $this->getDi()->get( 'router' ) instanceof RouterInterface ) ) {
-                throw new Exception( 'Router must be registered in DependencyInjection for '. static::class );
-            }
-
-            $router     = $this->router;
             foreach( $this->getArrayRoutes() as $pseudoPattern => $routeParams ) {
-                $route  = $router->add( $pseudoPattern, isset( $routeParams[ 'matches' ] ) ? $routeParams[ 'matches' ] : [] );
+                $route  = $this->getRouter()->add( $pseudoPattern, isset( $routeParams[ 'matches' ] ) ? $routeParams[ 'matches' ] : [] );
                 if( isset( $routeParams[ 'methods' ] ) ) {
                     $route->via( $routeParams[ 'methods' ] );
                 }
@@ -83,7 +94,7 @@
                 }
             }
 
-            return $router;
+            return $this->getRouter();
         }
 
         /**
