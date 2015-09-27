@@ -100,9 +100,9 @@ try {
 
     foreach( $router->getRoutes() as $route ) {
 
-        var_dump( $route->getPseudoPattern(), $route->getCompiledPattern(), '------------' );
+        print $route->getPseudoPattern() . PHP_EOL . $route->getCompiledPattern() . PHP_EOL . "\n\n";
 
-    } die;
+    }
 
     if( $router->isFounded() ) {
         die(var_dump( $router->getMatchedRoute() ));

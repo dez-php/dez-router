@@ -103,7 +103,7 @@
          * @param string $pseudoPattern
          * @return static
          */
-        public function setPseudoPattern($pseudoPattern) {
+        public function setPseudoPattern( $pseudoPattern ) {
             $this->pseudoPattern = $pseudoPattern;
             return $this;
         }
@@ -119,7 +119,7 @@
          * @param string $compiledPattern
          * @return static
          */
-        public function setCompiledPattern($compiledPattern) {
+        public function setCompiledPattern( $compiledPattern ) {
             $this->compiledPattern = $compiledPattern;
             return $this;
         }
@@ -250,7 +250,7 @@
          */
         protected function compilePattern() {
 
-            $compiled   = $this->getPseudoPattern();
+            $compiled   = addcslashes( $this->getPseudoPattern(), './' );
 
             if( ! $this->getDi() || ! ( $this->getDi() instanceof ContainerInterface ) ) {
                 throw new Exception( 'DependencyInjection is require for Route' );
@@ -268,7 +268,7 @@
             if( strpos( $this->getPseudoPattern(), ':' ) !== false ) {
                 $this->setRegexAble( true );
 
-                preg_match_all( '~:([a-z_]+?)~Uuis', $this->getPseudoPattern(), $macrosMatches, PREG_PATTERN_ORDER );
+                preg_match_all( '~:([a-z_]+?)~Uuis', $compiled, $macrosMatches, PREG_PATTERN_ORDER );
                 list( $macroses, $macrosNames )  = $macrosMatches;
 
                 foreach( $macroses as $index => $macros ) {

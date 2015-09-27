@@ -1,6 +1,6 @@
 <routes>
 
-    <route match=":postId-:pseudoName.:format" controller="post" action="item">
+    <route match=":postId-:pseudoName.:format" controller="post" action="item" postId="\d+" format="html|json">
 
     </route>
 
