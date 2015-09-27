@@ -1,9 +1,66 @@
+
 {
-  "routes":{
-    "article/{id}":{
-      "param":{
-        "id":"\\d"
-      }
+  "/:controller/:action.:format/:module-:do/:params/:statusCode": {
+    "regex": {
+      "statusCode": "\\d+",
+      "do": "[a-z]{10}",
+      "format": "html|json"
+    }
+  },
+  "/:controller/:action.:format/:module-:do/:params": {
+    "regex": {
+      "do": "[a-z]{10}",
+      "format": "html|json"
+    }
+  },
+  "/:controller/:action.:format/:module-:do": {
+    "regex": {
+      "do": "[a-z]{10}",
+      "format": "html|json"
+    }
+  },
+  "/:controller/:action/:id": {
+    "regex": [
+
+    ]
+  },
+  "/:controller/:action": {
+    "regex": [
+
+    ]
+  },
+  "/:controller/:action.:format": {
+    "regex": {
+      "format": "html|json"
+    },
+    "methods": [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE"
+    ]
+  },
+  "/:postId-:pseudoName.:format": {
+    "matches": {
+      "controller": "post",
+      "action": "item"
+    },
+    "regex": [
+
+    ]
+  },
+  "/:controller": {
+    "regex": [
+
+    ]
+  },
+  "/:token": {
+    "matches": {
+      "controller": "auth",
+      "action": "checkToken"
+    },
+    "regex": {
+      "token": "[a-f0-9]{40}"
     }
   }
 }

@@ -5,6 +5,7 @@ namespace Test;
 use Dez\DependencyInjection\Container;
 use Dez\EventDispatcher\Dispatcher;
 use Dez\Http\Request;
+use Dez\Router\Adapter\Xml;
 use Dez\Router\EventRoute;
 use Dez\Router\EventRouter;
 use Dez\Router\Router;
@@ -36,7 +37,7 @@ $di->set( 'router', function() {
 $di->set( 'eventDispatcher', function() {
     $dispatcher = new Dispatcher();
 
-    $dispatcher->addListener( EventRoute::BEFORE_COMPILE, function( $event, $name ) {
+/*    $dispatcher->addListener( EventRoute::BEFORE_COMPILE, function( $event, $name ) {
         var_dump($name);
     } );
 
@@ -64,7 +65,7 @@ $di->set( 'eventDispatcher', function() {
         var_dump($name);
         $event->stop();
         var_dump( $event->getRouter()->getMatchedRoute() );
-    } );
+    } );*/
 
     return $dispatcher;
 } );
@@ -74,24 +75,31 @@ $di->set( 'request', function() {
     return new Request();
 } );
 
+$import = new Xml( './routes.xml' );
+
+$import->setDi( $di );
+$import->loadRoutes();
+
 try {
     /** @var $router Router */
     $router = $di->get( 'router' );
 
-    $router->add( '/:token', [
-        'controller'    => 'auth',
-        'action'        => 'checkToken',
-    ] )->regex( 'token', '[a-f0-9]{40}' );
-
-    $router->add( '/:controller' );
-    $router->add( '/:controller/:action' );
-    $router->add( '/:controller/:action/:id' );
-    $router->add( '/:controller/:action/:token' );
-    $router->add( '/:controller/:action.:format/:module-:do/:params/:statusCode' )->regex( 'format', 'html|json' );
+//
+//
+//    $router->add( '/:token', [
+//        'controller'    => 'auth',
+//        'action'        => 'checkToken',
+//    ] )->regex( 'token', '[a-f0-9]{40}' );
+//
+//    $router->add( '/:controller' );
+//    $router->add( '/:controller/:action' );
+//    $router->add( '/:controller/:action/:id' );
+//    $router->add( '/:controller/:action/:token' );
+//    $router->add( '/:controller/:action.:format/:module-:do/:params/:statusCode' )->regex( 'format', 'html|json' );
+//
+//    $router->add( '/:id-:pseudoName.:format' )->regex( 'id', '\d+' )->regex('format', 'html|json');
 
     $router->handle();
-
-    die(var_dump($router));
 
     foreach( $testRoutes as $testRoute ) {
         $router->handle( $testRoute );
