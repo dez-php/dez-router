@@ -28,7 +28,7 @@
          * @param array $arrayRoutes
          * @param RouterInterface $router
          */
-        public function __construct(array $arrayRoutes = [], RouterInterface $router ) {
+        public function __construct( array $arrayRoutes = [], RouterInterface $router ) {
             $this->setArrayRoutes( $arrayRoutes );
             $this->setRouter( $router );
             $this->loadRoutes();

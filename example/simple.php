@@ -79,7 +79,7 @@ try {
     /** @var $router Router */
     $router = $di->get( 'router' );
 
-    $router->importFromXml( './routes.xml' );
+    $router->importFromJson( './routes.json' )->importFromXml( './routes.xml' );
 
 //
 //
@@ -105,7 +105,8 @@ try {
     }
 
     if( $router->isFounded() ) {
-        die(var_dump( $router->getMatchedRoute() ));
+        print "Module: {$router->getModule()}\nController: {$router->getController()}\nAction: {$router->getAction()}\n";
+        print implode( "\n", $router->getMatches() );
     }
     die;
 
@@ -131,5 +132,5 @@ try {
 
 } catch ( \Exception $e ) {
     header('content-type: text\plain');
-    die($e->getMessage() ."\n-------------\n". $e->getTraceAsString());
+    die($e->getMessage());
 }

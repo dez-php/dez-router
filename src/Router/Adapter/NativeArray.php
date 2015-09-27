@@ -3,6 +3,7 @@
     namespace Dez\Router\Adapter;
 
     use Dez\Router\Exception;
+    use Dez\Router\Router;
     use Dez\Router\RouterAdapter;
 
     /**

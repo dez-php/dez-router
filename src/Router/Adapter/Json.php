@@ -3,6 +3,7 @@
 namespace Dez\Router\Adapter;
 
 use Dez\Router\Exception;
+use Dez\Router\Router;
 use Dez\Router\RouterAdapter;
 
 /**
@@ -29,7 +30,7 @@ class Json extends RouterAdapter {
     }
 
     protected function parse() {
-        $this->setArrayRoutes( json_decode( $this->getRoutesFile(), true ) );
+        $this->setArrayRoutes( json_decode( file_get_contents( $this->getRoutesFile() ), true ) );
         return $this;
     }
 

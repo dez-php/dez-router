@@ -1,9 +1,5 @@
 <routes>
 
-    <route match=":postId-:pseudoName.:format" controller="post" action="item" postId="\d+" format="html|json">
-
-    </route>
-
     <route match=":module">
         <route match=":controller">
             <route match=":action">
@@ -11,22 +7,6 @@
                 <route match=":params"></route>
             </route>
         </route>
-    </route>
-
-    <route match=":controller">
-
-        <route match=":action">
-            <route match=":id"></route>
-        </route>
-
-        <route match=":action.:format" format="html|json" methods="get,post,put,delete">
-            <route match=":module-:do">
-                <route match=":params">
-                    <route match=":statusCode" statusCode="\d+"></route>
-                </route>
-            </route>
-        </route>
-
     </route>
 
     <route match=":token" controller="auth" action="checkToken" token="[a-f0-9]{40}"></route>
