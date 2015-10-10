@@ -37,6 +37,16 @@
         /**
          * @var array
          */
+        protected $macrosNames      = [];
+
+        /**
+         * @var array
+         */
+        protected $macrosPositions  = [];
+
+        /**
+         * @var array
+         */
         protected $methods          = [ 'GET' ];
 
         /**
@@ -62,7 +72,7 @@
             }
 
             $this->setRouteId( spl_object_hash( $this ) );
-            $this->replaceMacros();
+            $this->replaceMacros()->compileMacroses();
         }
 
         /**
@@ -172,6 +182,30 @@
         }
 
         /**
+         * @return array
+         */
+        public function getMacrosNames() {
+            return $this->macrosNames;
+        }
+
+        /**
+         * @return array
+         */
+        public function getMacrosPositions() {
+            return $this->macrosPositions;
+        }
+
+        /**
+         * @param array $macrosNames
+         * @return $this
+         */
+        public function setMacrosNames( $macrosNames ) {
+            $this->macrosNames      = $macrosNames;
+            $this->macrosPositions  = array_flip( $macrosNames );
+            return $this;
+        }
+
+        /**
          * @return null
          */
         public function getRouteId() {
@@ -250,8 +284,6 @@
          */
         protected function compilePattern() {
 
-            $compiled   = addcslashes( $this->getPseudoPattern(), './' );
-
             if( ! $this->getDi() || ! ( $this->getDi() instanceof ContainerInterface ) ) {
                 throw new Exception( 'DependencyInjection is require for Route' );
             }
@@ -265,24 +297,9 @@
             $router     = $this->router;
             $targetURI  = $router->getTargetUri();
 
-            if( strpos( $this->getPseudoPattern(), ':' ) !== false ) {
-                $this->setRegexAble( true );
+            if( $this->isRegexAble() ) {
 
-                preg_match_all( '~:([a-z_]+?)~Uuis', $compiled, $macrosMatches, PREG_PATTERN_ORDER );
-                list( $macroses, $macrosNames )  = $macrosMatches;
-
-                foreach( $macroses as $index => $macros ) {
-                    if( isset( $this->regexes[ $macrosNames[ $index ] ] ) ) {
-                        $regex  = $this->regexes[ $macrosNames[ $index ] ]['regex'];
-                    } else {
-                        $regex  = '([a-zA-Z0-9-_]+)';
-                        $this->regex( $macrosNames[ $index ], $regex );
-                    }
-                    $compiled   = str_replace( $macros, $regex, $compiled );
-                }
-
-                $this->setCompiledPattern( $compiled );
-
+                $compiled   = $this->getCompiledPattern();
                 preg_match_all( "~^$compiled$~Uus", $targetURI, $matches, PREG_SET_ORDER );
 
                 $this->getEventDispatcher()->dispatch( EventRoute::AFTER_COMPILE, new EventRoute( $this ) );
@@ -291,6 +308,7 @@
                     $matches        = $matches[0];
                     array_shift( $matches );
 
+                    $macrosNames    = $this->getMacrosNames();
                     foreach( $matches as $index => $foundValue ) {
                         $this->setMatch( $macrosNames[$index], $foundValue );
                     }
@@ -306,6 +324,37 @@
             }
 
             return false;
+        }
+
+        /**
+         * @return $this
+         */
+        protected function compileMacroses() {
+
+            $compiled   = addcslashes( $this->getPseudoPattern(), './' );
+
+            if( strpos( $this->getPseudoPattern(), ':' ) !== false ) {
+
+                $this->setRegexAble( true );
+
+                preg_match_all( '~:([a-z_]+?)~Uuis', $compiled, $macrosMatches, PREG_PATTERN_ORDER );
+                list( $macroses, $macrosNames )  = $macrosMatches;
+
+                foreach( $macroses as $index => $macros ) {
+                    if( isset( $this->regexes[ $macrosNames[ $index ] ] ) ) {
+                        $regex  = $this->regexes[ $macrosNames[ $index ] ]['regex'];
+                    } else {
+                        $regex  = '([a-zA-Z0-9-_]+)';
+                        $this->regex( $macrosNames[ $index ], $regex );
+                    }
+                    $compiled   = str_replace( $macros, $regex, $compiled );
+                }
+
+                $this->setMacrosNames( $macrosNames );
+                $this->setCompiledPattern( $compiled );
+            }
+
+            return $this;
         }
 
         /**
