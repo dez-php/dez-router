@@ -238,6 +238,29 @@
         }
 
         /**
+         * @param string $name
+         * @return boolean
+         */
+        public function hasRegex( $name ) {
+            return isset( $this->regexes[ $name ] );
+        }
+
+        /**
+         * @param string $name
+         * @return array|null
+         */
+        public function getRegex( $name ) {
+            return $this->hasRegex( $name ) ? $this->regexes[ $name ] : null;
+        }
+
+        /**
+         * @return array
+         */
+        public function getRegexes() {
+            return $this->regexes;
+        }
+
+        /**
          * @param $name
          * @param $regex
          * @return $this
