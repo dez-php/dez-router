@@ -47,7 +47,7 @@
         /**
          * @var array
          */
-        protected $methods          = [ 'GET' ];
+        protected $methods          = [];
 
         /**
          * @var bool
@@ -295,7 +295,7 @@
             }
 
             $request    = $this->request;
-            if( $request->isMethod( $this->getMethods() ) ) {
+            if( count( $this->getMethods() ) == 0 || $request->isMethod( $this->getMethods() ) ) {
                 return $this->compilePattern();
             }
             return false;
