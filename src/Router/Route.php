@@ -72,7 +72,6 @@
             }
 
             $this->setRouteId( spl_object_hash( $this ) );
-            $this->replaceMacros()->compileMacroses();
         }
 
         /**
@@ -316,6 +315,8 @@
             }
 
             $this->getEventDispatcher()->dispatch( EventRoute::BEFORE_COMPILE, new EventRoute( $this ) );
+
+            $this->replaceMacros()->compileMacroses();
 
             $router     = $this->router;
             $targetURI  = $router->getTargetUri();
