@@ -315,7 +315,7 @@
          * @return static
          */
         public function setTargetUri( $targetUri ) {
-            $this->targetUri = preg_replace( '~/+~u', '/', $targetUri );
+            $this->targetUri = '/'. trim( preg_replace( '~/+~u', '/', $targetUri ), '/' );
             return $this;
         }
 
