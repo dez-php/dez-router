@@ -164,8 +164,12 @@ class Router extends Injectable implements RouterInterface
             if ($route->handleUri() === true) {
 
                 foreach (static::$reservedNames as $name) {
-                    $this->{$name} = $route->hasMatch($name)
-                        ? $route->getMatch($name) : static::$defaultValues[$name];
+                    if($name !== static::MATCH_PARAMS) {
+                        $this->{$name} = $route->hasMatch($name)
+                            ? $route->getMatch($name) : static::$defaultValues[$name];
+                    } else {
+                        $this->setDirtyMatches($route->getMatch(static::MATCH_PARAMS));
+                    }
                 }
 
                 $this->setMatches($route->getMatches());

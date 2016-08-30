@@ -432,7 +432,7 @@ class Route extends Injectable implements RouteInterface
         $compiled = $this->getPseudoPattern();
 
         foreach ($macroses as $macros => list($name, $regex)) {
-            if (strpos($compiled, $macros)) {
+            if (strpos($compiled, $macros) !== false) {
                 $this->regex($name, $regex);
             }
         }
