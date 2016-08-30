@@ -10,7 +10,8 @@ use Dez\Router\RouterAdapter;
  * Class Json
  * @package Dez\Router\Adapter
  */
-class Json extends RouterAdapter {
+class Json extends RouterAdapter
+{
 
     /**
      * Json constructor.
@@ -18,19 +19,21 @@ class Json extends RouterAdapter {
      * @param Router $router
      * @throws Exception
      */
-    public function __construct( $routesFile, Router $router  ) {
-        if ( ! file_exists( $routesFile ) ) {
+    public function __construct($routesFile, Router $router)
+    {
+        if (!file_exists($routesFile)) {
             throw new Exception('Routes file not found [' . $routesFile . ']');
         }
 
-        $this->setRoutesFile( $routesFile );
+        $this->setRoutesFile($routesFile);
         $this->parse();
 
-        parent::__construct( $this->getArrayRoutes(), $router );
+        parent::__construct($this->getArrayRoutes(), $router);
     }
 
-    protected function parse() {
-        $this->setArrayRoutes( json_decode( file_get_contents( $this->getRoutesFile() ), true ) );
+    protected function parse()
+    {
+        $this->setArrayRoutes(json_decode(file_get_contents($this->getRoutesFile()), true));
         return $this;
     }
 

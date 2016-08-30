@@ -1,9 +1,9 @@
 <?php
 
-    namespace Dez\Router;
+namespace Dez\Router;
 
-    interface RouteInterface {
+interface RouteInterface
+{
 
 
-
-    }
+}

@@ -10,7 +10,8 @@ use Dez\Router\RouterAdapter;
  * Class FileArray
  * @package Dez\Router\Adapter
  */
-class FileArray extends RouterAdapter {
+class FileArray extends RouterAdapter
+{
 
     /**
      * FileArray constructor.
@@ -18,20 +19,22 @@ class FileArray extends RouterAdapter {
      * @param Router $router
      * @throws Exception
      */
-    public function __construct( $routesFile, Router $router ) {
-        if ( ! file_exists( $routesFile ) ) {
+    public function __construct($routesFile, Router $router)
+    {
+        if (!file_exists($routesFile)) {
             throw new Exception('Routes file not found [' . $routesFile . ']');
         }
 
-        $this->setRoutesFile( $routesFile );
+        $this->setRoutesFile($routesFile);
         $this->parse();
 
-        parent::__construct( $this->getArrayRoutes(), $router );
+        parent::__construct($this->getArrayRoutes(), $router);
     }
 
-    protected function parse() {
-        $routes  = include $this->getRoutesFile();
-        $this->setArrayRoutes( $routes );
+    protected function parse()
+    {
+        $routes = include $this->getRoutesFile();
+        $this->setArrayRoutes($routes);
         return $this;
     }
 

@@ -1,9 +1,9 @@
 <?php
 
-    namespace Dez\Router;
+namespace Dez\Router;
 
-    class Exception extends \Exception {
+class Exception extends \Exception
+{
 
 
-
-    }
+}

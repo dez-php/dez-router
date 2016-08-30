@@ -1,15 +1,16 @@
 <?php
 
-    namespace Dez\Router;
+namespace Dez\Router;
 
-    interface RouterInterface {
+interface RouterInterface
+{
 
-        public function importFromJson( $routesFile = null );
+    public function importFromJson($routesFile = null);
 
-        public function importFromXml( $routesFile = null );
+    public function importFromXml($routesFile = null);
 
-        public function importFromArray( $routesFile = null );
+    public function importFromArray($routesFile = null);
 
-        public function importFromFileArray( $routesFile = null );
+    public function importFromFileArray($routesFile = null);
 
-    }
+}
